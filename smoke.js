@@ -34,16 +34,16 @@ export const options = {
   }
 };
 
-const BASE_URL = 'https://test-api.k6.io';
-const USERNAME = 'TestUser';
-const PASSWORD = 'SuperCroc2020';
+const BASE_URL = 'https://test.zebrasign.com/';
+const USERNAME = 'deivistest@zebra.com';
+const PASSWORD = 'Testing1-';
 //Test with this API: https://github.com/JoanEsquivel/cypress-course/blob/master/cypress/e2e/39-api-testing-demo.cy.ts
 
 export default () => {
   // JS function expression to return a refresh an object with a couple of key/values: refresh & access
   // https://test-api.k6.io/auth/token/login/
   // @returns — Resulting response.
-  const loginRes = http.post(`${BASE_URL}/auth/token/login/`, {
+  const loginRes = http.post(`${BASE_URL}/login`, {
     username: USERNAME,
     password: PASSWORD,
   });
@@ -63,10 +63,6 @@ export default () => {
     },
   };
 
-  //Endpoint: https://test-api.k6.io/my/crocodiles/
-  const myObjects = http.get(`${BASE_URL}/my/crocodiles/`, authHeaders).json();
-  //This check is going to validate that there is more than one crocodile return
-  check(myObjects, { 'retrieved crocodiles': (obj) => obj.length > 0 });
-
+  const myObjects = http.get(`${BASE_URL}/document/list`, authHeaders).json();
   sleep(1);
 };

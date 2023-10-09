@@ -1,18 +1,4 @@
 // === Stress - Load Testing ===
-// https://k6.io/docs/test-types/stress-testing/
-
-//? Definition: the purpose of stress testing is to assess the availability and stability of the system under heavy load. 
-//? ------ >    It is a type of load testing used to determine the limits of the system. The purpose of this test is to verify the stability and reliability of the system under extreme conditions.
-//? Why is it important? To determine
-// * How your system behaves under extreme conditions.
-// * What the maximum capacity of your system is in terms of users or throughput.
-// * What is the breaking point of your system and its failure mode.
-// * Whether your system will recover without manual intervention after the stress test is over.
-
-//! Note that a stress test doesn't overwhelm the system immediately—that's a spike test, which is covered in the next section.
-// Classic examples of a need for stress testing are Black Friday or Cyber Monday, two days each year that generate multiple times the normal traffic for many websites.
-
-//! NO PROD, We recommend running a stress test in a UAT or staging environment.
 
 //API for testing: https://test-api.k6.io/auth/token/login/
 
@@ -32,20 +18,15 @@ export const options = {
       // More info about this executor: https://k6.io/docs/using-k6/scenarios/executors/ramping-arrival-rate/
       executor: "ramping-arrival-rate",
       //Number of VUs to pre-allocate before test start to preserve runtime resources.
-      preAllocatedVUs: 500,
+      preAllocatedVUs: 50,
       timeUnit: "1s",
       // Period of time to apply the startRate to the stages' target value.
       // Its value is constant for the whole duration of the scenario, it is not possible to change it for a specific stage.
       stages: [
-        { duration: "2m", target: 10 }, // below normal load
-        { duration: "5m", target: 10 },
-        { duration: "2m", target: 20 }, // normal load
-        { duration: "5m", target: 20 },
-        { duration: "2m", target: 30 }, // around the breaking point
-        { duration: "5m", target: 30 },
-        { duration: "2m", target: 40 }, // beyond the breaking point
-        { duration: "5m", target: 40 },
-        { duration: "10m", target: 0 }, // scale down. Recovery stage.
+        { duration: "10s", target: 50 },
+        { duration: "20s", target: 50 },
+//        { duration: "2m", target: 50 },
+//        { duration: "1m", target: 5 },
       ],
     },
   },
@@ -53,7 +34,7 @@ export const options = {
   //k6 run -o cloud smoke.js if I want to send this to k6 cloud
   ext: {
     loadimpact: {
-      projectID: 3629234,
+      projectID: 1,
       // Test runs with the same name groups test runs together
       name: "Smoke demo"
     }
@@ -61,13 +42,16 @@ export const options = {
 };
 
 export default function () {
-  const BASE_URL = "https://test-api.k6.io"; // make sure this is not production
+  const BASE_URL = "https://test.zebrasign.com"; // make sure this is not production
   // -> https://k6.io/docs/javascript-api/k6-http/batch/
   // Batch multiple HTTP requests together to issue them in parallel over multiple TCP connections. 
   const responses = http.batch([
-    ["GET", `${BASE_URL}/public/crocodiles/1/`],
-    ["GET", `${BASE_URL}/public/crocodiles/2/`],
-    ["GET", `${BASE_URL}/public/crocodiles/3/`],
-    ["GET", `${BASE_URL}/public/crocodiles/4/`],
+    ["GET", `${BASE_URL}/lt.json`],
+    ["POST", `${BASE_URL}/login`],
+    ["GET", `${BASE_URL}/document/statistics?folder_id=all&type=all`],
+    ["POST", `${BASE_URL}/document/send-for-signing`],
+    ["POST", `${BASE_URL}/document/sign`],
+
+
   ]);
 }
